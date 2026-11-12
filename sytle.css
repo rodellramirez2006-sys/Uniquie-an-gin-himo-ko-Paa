@@ -1,0 +1,247 @@
+/* ---------- Theme ---------- */
+:root {
+  --bg: #d9ecc8;
+  --ink: #2b2118;
+  --panel: #fff8e8;
+  --grass: #6fb04a;
+  --dirt: #6b4426;
+  --hole: #2a1a0e;
+  --accent: #e8512f;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16210f;
+    --ink: #f3ead7;
+    --panel: #2a2f1f;
+    --grass: #3f7a2c;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #16210f;
+  --ink: #f3ead7;
+  --panel: #2a2f1f;
+  --grass: #3f7a2c;
+}
+
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+
+/* ---------- Page ---------- */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  counter-reset: score;            /* the score counter starts at 0 */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Hidden checkboxes: the start switch and one per mole */
+#go, .hit {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.hit:checked { counter-increment: score; }   /* +1 for every whacked mole */
+
+/* ---------- Game card ---------- */
+.game {
+  position: relative;
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--panel);
+  border-radius: 28px;
+  padding: 18px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+}
+
+/* HUD sits after the board in the HTML (so the counter works)
+   but is shown at the top */
+.hud {
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hud h1 { margin: 0; font-size: 1.6rem; line-height: 1.1; }
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.score::after {
+  content: counter(score);         /* live score */
+  display: inline-block;
+  min-width: 1.5ch;
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+
+/* ---------- Timer bar ---------- */
+.bar {
+  height: 12px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, .15);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left;
+}
+#go:checked ~ .game .bar i { animation: drain 28s linear forwards; }
+@keyframes drain { to { transform: scaleX(0); } }
+
+/* ---------- Board and holes ---------- */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: var(--grass);
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.hole {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;                /* hides the mole below the dirt */
+  border-radius: 0 0 50% 50% / 0 0 30% 30%;
+}
+
+/* dark hole */
+.hole::before {
+  content: "";
+  position: absolute;
+  left: 6%; right: 6%; bottom: 6%;
+  height: 34%;
+  background: var(--hole);
+  border-radius: 50%;
+}
+
+/* dirt mound in front of the mole */
+.hole::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 24%;
+  background: var(--dirt);
+  border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ---------- Moles ---------- */
+.mole {
+  position: absolute;
+  left: 10%; right: 10%; bottom: 16%;
+  text-align: center;
+  font-size: min(14vw, 4.6rem);
+  line-height: 1;
+  visibility: hidden;              /* only visible during its pop window */
+  transform: translateY(115%);
+  cursor: pointer;
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --d = start delay, --u = how long the mole stays up (set inline in the HTML) */
+#go:checked ~ .game .mole { animation: pop var(--u) ease-out var(--d) 1; }
+
+@keyframes pop {
+  0%   { visibility: visible; transform: translateY(115%); }
+  18%  { visibility: visible; transform: translateY(0); }
+  78%  { visibility: visible; transform: translateY(0); }
+  100% { visibility: visible; transform: translateY(115%); }
+}
+
+.hit:checked + .mole { display: none; }      /* whacked: mole disappears */
+
+/* ---------- Start and end screens ---------- */
+.cover {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 24px;
+  z-index: 5;
+}
+.cover p { margin: 0; font-size: 1.05rem; line-height: 1.4; }
+
+.btn {
+  display: inline-block;
+  justify-self: center;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1.3rem;
+  padding: 12px 28px;
+  border-radius: 99px;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .25);
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .25);
+}
+
+#go:checked ~ .game .start { display: none; }   /* hide start screen */
+
+.over {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.over h2 { margin: 0; font-size: 1.8rem; }
+
+.final::after {
+  content: counter(score) " / 27";
+  display: block;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* "Time's up" appears after 28 seconds */
+#go:checked ~ .game .over { animation: show .4s ease 28s forwards; }
+@keyframes show {
+  to { opacity: 1; visibility: visible; pointer-events: auto; }
+}
+
+/* ---------- Accessibility ---------- */
+#go:focus-visible ~ .game .start .btn,
+.btn:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mole { transition: none; }
+}

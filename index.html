@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whack-a-Mole (pure CSS)</title>
+<style>
+:root{--bg:#d9ecc8;--ink:#2b2118;--panel:#fff8e8;--grass:#6fb04a;--dirt:#6b4426;--hole:#2a1a0e;--accent:#e8512f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16210f;--ink:#f3ead7;--panel:#2a2f1f;--grass:#3f7a2c}}
+:root[data-theme="dark"]{--bg:#16210f;--ink:#f3ead7;--panel:#2a2f1f;--grass:#3f7a2c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;display:grid;place-items:center;padding:16px;counter-reset:score;-webkit-user-select:none;user-select:none}
+#go,.hit{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+.hit:checked{counter-increment:score}
+.game{position:relative;width:min(440px,100%);display:flex;flex-direction:column;gap:14px;background:var(--panel);border-radius:28px;padding:18px;box-shadow:0 8px 0 rgba(0,0,0,.18)}
+.hud{order:-1;display:flex;flex-direction:column;gap:10px}
+.hud h1{margin:0;font-size:1.6rem;line-height:1.1}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:1.2rem;font-weight:600}
+.score::after{content:counter(score);display:inline-block;min-width:1.5ch;font-size:1.8rem;color:var(--accent)}
+.bar{height:12px;border-radius:99px;background:rgba(0,0,0,.15);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left}
+#go:checked ~ .game .bar i{animation:drain 28s linear forwards}
+@keyframes drain{to{transform:scaleX(0)}}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:var(--grass);padding:12px;border-radius:20px}
+.hole{position:relative;aspect-ratio:1;overflow:hidden;border-radius:0 0 50% 50%/0 0 30% 30%}
+.hole::before{content:"";position:absolute;left:6%;right:6%;bottom:6%;height:34%;background:var(--hole);border-radius:50%}
+.hole::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24%;background:var(--dirt);border-radius:50% 50% 40% 40%/60% 60% 40% 40%;pointer-events:none;z-index:2}
+.mole{position:absolute;left:10%;right:10%;bottom:16%;text-align:center;font-size:min(14vw,4.6rem);line-height:1;visibility:hidden;transform:translateY(115%);cursor:pointer;z-index:1;-webkit-tap-highlight-color:transparent}
+#go:checked ~ .game .mole{animation:pop var(--u) ease-out var(--d) 1}
+@keyframes pop{0%{visibility:visible;transform:translateY(115%)}18%{visibility:visible;transform:translateY(0)}78%{visibility:visible;transform:translateY(0)}100%{visibility:visible;transform:translateY(115%)}}
+.hit:checked + .mole{display:none}
+.cover{position:absolute;inset:0;border-radius:28px;background:color-mix(in srgb,var(--panel) 94%,transparent);display:grid;place-content:center;gap:14px;text-align:center;padding:24px;z-index:5}
+.cover p{margin:0;font-size:1.05rem;line-height:1.4}
+.btn{display:inline-block;justify-self:center;background:var(--accent);color:#fff;font:inherit;font-weight:600;font-size:1.3rem;padding:12px 28px;border-radius:99px;box-shadow:0 5px 0 rgba(0,0,0,.25);cursor:pointer;text-decoration:none}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+#go:checked ~ .game .start{display:none}
+.over{opacity:0;visibility:hidden;pointer-events:none}
+.over h2{margin:0;font-size:1.8rem}
+.final::after{content:counter(score) " / 27";display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+#go:checked ~ .game .over{animation:show .4s ease 28s forwards}
+@keyframes show{to{opacity:1;visibility:visible;pointer-events:auto}}
+#go:focus-visible ~ .game .start .btn,.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.mole{transition:none}}
+</style>
+</head>
+<body>
+<input type="checkbox" id="go">
+<main class="game">
+<div class="board">
+<div class="hole"><input type="checkbox" class="hit" id="m1"><label for="m1" class="mole" style="--d:0.8s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m2"><label for="m2" class="mole" style="--d:10.3s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m3"><label for="m3" class="mole" style="--d:19.8s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m4"><label for="m4" class="mole" style="--d:3.1s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m5"><label for="m5" class="mole" style="--d:12.6s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m6"><label for="m6" class="mole" style="--d:22.1s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m7"><label for="m7" class="mole" style="--d:1.9s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m8"><label for="m8" class="mole" style="--d:11.4s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m9"><label for="m9" class="mole" style="--d:20.9s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m10"><label for="m10" class="mole" style="--d:5.2s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m11"><label for="m11" class="mole" style="--d:14.7s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m12"><label for="m12" class="mole" style="--d:24.2s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m13"><label for="m13" class="mole" style="--d:2.6s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m14"><label for="m14" class="mole" style="--d:12.1s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m15"><label for="m15" class="mole" style="--d:21.6s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m16"><label for="m16" class="mole" style="--d:4.4s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m17"><label for="m17" class="mole" style="--d:13.9s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m18"><label for="m18" class="mole" style="--d:23.4s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m19"><label for="m19" class="mole" style="--d:6.0s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m20"><label for="m20" class="mole" style="--d:15.5s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m21"><label for="m21" class="mole" style="--d:25.0s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m22"><label for="m22" class="mole" style="--d:3.8s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m23"><label for="m23" class="mole" style="--d:13.3s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m24"><label for="m24" class="mole" style="--d:22.8s;--u:0.95s" aria-label="Mole">🐹</label></div>
+<div class="hole"><input type="checkbox" class="hit" id="m25"><label for="m25" class="mole" style="--d:1.2s;--u:1.5s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m26"><label for="m26" class="mole" style="--d:10.7s;--u:1.25s" aria-label="Mole">🐹</label><input type="checkbox" class="hit" id="m27"><label for="m27" class="mole" style="--d:20.2s;--u:0.95s" aria-label="Mole">🐹</label></div>
+</div>
+<header class="hud">
+<h1>Whack-a-Mole</h1>
+<div class="row"><span>Whacked: <span class="score"></span></span><span>28 seconds</span></div>
+<div class="bar"><i></i></div>
+</header>
+<label for="go" class="cover start">
+<p>Moles pop up fast and get quicker. Tap or click each one before it ducks back down.</p>
+<span class="btn">Start game</span>
+</label>
+<div class="cover over">
+<h2>Time’s up!</h2>
+<p class="final">Moles whacked</p>
+<a class="btn" href="">Play again</a>
+</div>
+</main>
+</body>
+</html>
